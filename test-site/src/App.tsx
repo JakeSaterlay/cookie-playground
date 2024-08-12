@@ -6,14 +6,16 @@ const App = () => {
   const [cookies, setCookies] = useState<Record<string, string> | null>(null);
 
   useEffect(() => {
-    axios
-      .get("http://localhost:5000/check-cookies", { withCredentials: true })
-      .then((response) => {
-        setCookies(response.data);
-      })
-      .catch((error) => {
-        console.error("There was an error making the request!", error);
+    const doCookies = async () => {
+      await axios.get("http://localhost:5000/set-cookie", {
+        withCredentials: true,
       });
+      const response = await axios.get("http://localhost:5000/check-cookies", {
+        withCredentials: true,
+      });
+      setCookies(response.data);
+    };
+    doCookies();
   }, []);
 
   const setFrontEndCookie = () => {
@@ -21,15 +23,11 @@ const App = () => {
     alert("Cookie has been set!");
   };
 
-  const checkCookies = () => {
-    axios
-      .get("http://localhost:5000/check-cookies", { withCredentials: true })
-      .then((response) => {
-        setCookies(response.data);
-      })
-      .catch((error) => {
-        console.error("There was an error making the request!", error);
-      });
+  const checkCookies = async () => {
+    const response = await axios.get("http://localhost:5000/check-cookies", {
+      withCredentials: true,
+    });
+    setCookies(response.data);
   };
 
   return (
@@ -37,7 +35,11 @@ const App = () => {
       <h1>Check Cookies</h1>
       <button onClick={setFrontEndCookie}>Set Front End Cookie</button>
       <button onClick={checkCookies}>Check Cookies</button>
-      <pre>{cookies && JSON.stringify(cookies, null, 2)}</pre>
+      {cookies === null ? (
+        <p>Loading cookies...</p>
+      ) : (
+        <pre>{JSON.stringify(cookies, null, 2)}</pre>
+      )}
     </div>
   );
 };
